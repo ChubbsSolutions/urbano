@@ -97,28 +97,31 @@ func getNewWord() (objects.WordData, error) {
 	var UDURL = "http://api.urbandictionary.com/v0/random"
 	wd := objects.WordDataSlice{}
 	var word objects.WordData
+	var good = false
+	tu := 2000
 
-	resp, err := http.Get(UDURL)
-	if err != nil {
-		return word, err
-	}
-	defer resp.Body.Close()
+	for good == false {
+		resp, err := http.Get(UDURL)
+		if err != nil {
+			return word, err
+		}
+		defer resp.Body.Close()
 
-	data, _ := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return word, err
-	}
+		data, _ := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return word, err
+		}
 
-	err = json.Unmarshal([]byte(string(data)), &wd)
-	if err != nil {
-		return word, err
-	}
+		err = json.Unmarshal([]byte(string(data)), &wd)
+		if err != nil {
+			return word, err
+		}
 
-	tu := 600
-
-	for _, element := range wd.List {
-		if element.ThumbsUp > tu {
-			word = element
+		for _, element := range wd.List {
+			if element.ThumbsUp > tu {
+				word = element
+				good = true
+			}
 		}
 	}
 	return word, nil
