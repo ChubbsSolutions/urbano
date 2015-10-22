@@ -125,7 +125,7 @@ func getNewWord() (objects.WordData, error) {
 }
 
 func displayNumbers(word objects.WordData) error {
-	fmt.Println(word.Word)
+
 	fmt.Print(chalk.Cyan, "Word of the day: ", word.Word, "   ++Thumbs Up: ", word.ThumbsUp, "   --Thumbs Down: ", word.ThumbsDown, "\n\n")
 	fmt.Print(chalk.Green, word.Definition, "\n\n")
 	fmt.Print(chalk.Blue, "Example: ", word.Example, "\n\n")
