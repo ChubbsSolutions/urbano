@@ -16,7 +16,7 @@ import (
 )
 
 //Define constants
-const version string = "0.1"
+const version string = "0.2"
 const author string = "Chubbs Solutions"
 const email string = "urbano@chubbs.solutions"
 const appName string = "urbano"
@@ -114,7 +114,7 @@ func getNewWord() (objects.WordData, error) {
 		return word, err
 	}
 
-	tu := 0
+	tu := 600
 
 	for _, element := range wd.List {
 		if element.ThumbsUp > tu {
