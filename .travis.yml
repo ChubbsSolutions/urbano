@@ -1,0 +1,12 @@
+language: go
+
+go:
+    - tip
+
+branches:
+  only:
+    - master
+
+install: 
+    - go get
+    - go build
