@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/ChubbsSolutions/urbano/objects"
@@ -16,7 +17,7 @@ import (
 )
 
 //Define constants
-const version string = "0.2"
+const version string = "0.3"
 const author string = "Chubbs Solutions"
 const email string = "urbano@chubbs.solutions"
 const appName string = "urbano"
@@ -47,13 +48,13 @@ func main() {
 				word, err := getNewWord()
 				if err != nil {
 					fmt.Println(chalk.Red, "Error getting the word")
-					os.Exit(-1)
+					return
 				}
 
-				err = displayNumbers(word)
+				err = displayWord(word)
 				if err != nil {
 					fmt.Println(chalk.Red, err)
-					os.Exit(-1)
+					return
 				}
 
 				if len(c.Args()) == 1 {
@@ -62,7 +63,7 @@ func main() {
 					err = emailWord(word, subject, recipient)
 					if err != nil {
 						fmt.Println(chalk.Red, err)
-						os.Exit(-1)
+						return
 					}
 
 				}
@@ -76,13 +77,39 @@ func main() {
 				word, err := getNewWord()
 				if err != nil {
 					fmt.Println(chalk.Red, err)
-					os.Exit(-1)
+					return
 				}
 
-				err = displayNumbers(word)
+				err = displayWord(word)
 				if err != nil {
 					fmt.Println(chalk.Red, err)
-					os.Exit(-1)
+					return
+				}
+			},
+		},
+		{
+			Name:      "word",
+			ShortName: "w",
+			Usage:     "Define a word",
+			Action: func(c *cli.Context) {
+				if len(c.Args()) != 1 {
+					fmt.Println("Usage: urbano word|w word")
+					return
+				}
+				word, err := getWordDefinition(c.Args()[0])
+				if fmt.Sprintf("%s", err) == "NOTFOUND" {
+					fmt.Printf("Sorry, %s is not on Urban Dictionary.\n", c.Args()[0])
+					return
+				}
+				if err != nil {
+					fmt.Println(chalk.Red, err)
+					return
+				}
+
+				err = displayWord(word)
+				if err != nil {
+					fmt.Println(chalk.Red, err)
+					return
 				}
 			},
 		},
@@ -127,7 +154,42 @@ func getNewWord() (objects.WordData, error) {
 	return word, nil
 }
 
-func displayNumbers(word objects.WordData) error {
+//getWordDefinition gets a random UD word
+func getWordDefinition(wordToDefine string) (objects.WordData, error) {
+	var UDURL = "http://api.urbandictionary.com/v0/define?term=" + strings.Replace(wordToDefine, " ", "", -1)
+	wd := objects.WordDataSlice{}
+	var word objects.WordData
+
+	resp, err := http.Get(UDURL)
+	if err != nil {
+		return word, err
+	}
+
+	defer resp.Body.Close()
+
+	data, _ := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return word, err
+	}
+
+	err = json.Unmarshal([]byte(string(data)), &wd)
+	if err != nil {
+		return word, err
+	}
+
+	for _, element := range wd.List {
+		if element.ThumbsUp > word.ThumbsUp {
+			word = element
+		}
+	}
+	if word.Definition == "" {
+		return word, errors.New("NOTFOUND")
+	}
+	return word, nil
+}
+
+//displayWord displaying word.
+func displayWord(word objects.WordData) error {
 
 	fmt.Print(chalk.Cyan, "Word of the day: ", word.Word, "   ++Thumbs Up: ", word.ThumbsUp, "   --Thumbs Down: ", word.ThumbsDown, "\n\n")
 	fmt.Print(chalk.Green, word.Definition, "\n\n")

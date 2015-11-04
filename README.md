@@ -28,14 +28,15 @@ USAGE:
    urbano [global options] command [command options] [arguments...]
 
 VERSION:
-   0.1
+   0.3
 
 AUTHOR(S):
-	Chubbs Solutions <urbano@chubbs.solutions>
+   Chubbs Solutions <urbano@chubbs.solutions>
 
 COMMANDS:
    send, s	Get and Send a new word by email
    display, d	Display a new word
+   word, w	Define a word
    help, h	Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
