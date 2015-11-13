@@ -125,7 +125,7 @@ func getNewWord() (objects.WordData, error) {
 	wd := objects.WordDataSlice{}
 	var word objects.WordData
 	var good = false
-	tu := 2000
+	tu := 13000
 
 	for good == false {
 		resp, err := http.Get(UDURL)
