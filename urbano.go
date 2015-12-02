@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -26,7 +27,7 @@ const appDescription string = "Get a fresh Urban  Dictionary word in your inbox"
 //MailgunPublicAPIKey key for the mail service.
 var MailgunPublicAPIKey = os.Getenv("MAILGUN_PUBLIC_API_KEY")
 
-//MailgunPrivateAPIKey key for the mail service.
+//MailgunDomain key for the mail service.
 var MailgunDomain = os.Getenv("MAILGUN_DOMAIN")
 
 //Evaluate options on main
@@ -115,7 +116,12 @@ func main() {
 		},
 	}
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Println(chalk.Red, err)
+		return
+
+	}
 
 }
 
@@ -125,14 +131,19 @@ func getNewWord() (objects.WordData, error) {
 	wd := objects.WordDataSlice{}
 	var word objects.WordData
 	var good = false
-	tu := 2000
+	tu := 30000
 
 	for good == false {
 		resp, err := http.Get(UDURL)
 		if err != nil {
 			return word, err
 		}
-		defer resp.Body.Close()
+		defer func() {
+			err := resp.Body.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
 
 		data, _ := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -165,7 +176,12 @@ func getWordDefinition(wordToDefine string) (objects.WordData, error) {
 		return word, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	data, _ := ioutil.ReadAll(resp.Body)
 	if err != nil {
